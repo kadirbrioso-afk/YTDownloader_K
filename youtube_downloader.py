@@ -24,7 +24,7 @@ from yt_dlp.utils import DownloadCancelled, DownloadError, download_range_func
 ctk.set_appearance_mode("Dark")
 ctk.set_default_color_theme("blue")
 
-VERSION_APP = "8.1"
+VERSION_APP = "8.2"
 
 # NUEVO v8.1: traducciones parciales de interfaz (botones y encabezados
 # principales). Los mensajes de estado dinámicos durante análisis/descarga
@@ -416,7 +416,12 @@ class YoutubeUniversalDownloader(ctk.CTk):
 
         # NUEVO: evitar duplicados
         self.omitir_duplicados_var = tk.BooleanVar(value=True)
-        ctk.CTkCheckBox(self.frame_obsidian_opt, text="Omitir video si ya fue descargado antes en esta carpeta", variable=self.omitir_duplicados_var, font=("Helvetica", 11)).grid(row=4, column=0, padx=20, pady=(6, 12), sticky="w")
+        ctk.CTkCheckBox(self.frame_obsidian_opt, text="Omitir video si ya fue descargado antes en esta carpeta", variable=self.omitir_duplicados_var, font=("Helvetica", 11)).grid(row=4, column=0, padx=20, pady=6, sticky="w")
+
+        # NUEVO: casilla para hacer opcional la generación de la nota .md
+        # (que incluye la descripción del video, ficha técnica y capítulos)
+        self.generar_markdown_var = tk.BooleanVar(value=True)
+        ctk.CTkCheckBox(self.frame_obsidian_opt, text="Generar nota Markdown (.md) con descripción y metadatos", variable=self.generar_markdown_var, font=("Helvetica", 11)).grid(row=5, column=0, padx=20, pady=(6, 12), sticky="w")
 
         # NUEVO v8.1: transcripción automática con Whisper
         self.frame_transcripcion = ctk.CTkFrame(self.scroll_settings, fg_color="#09090B", corner_radius=8, border_width=1, border_color="#27272A")
@@ -1254,7 +1259,8 @@ class YoutubeUniversalDownloader(ctk.CTk):
             self.limpiar_hilo_terminado(threading.current_thread())
 
     def finalizar_flujo_individual(self, ruta, capitulos, desc, transcripcion=None, integridad_ok=True):
-        self.corregir_a_markdown(ruta, self.titulo_video_actual, self.id_video_actual, self.canal_video_actual, self.fecha_video_actual, self.duracion_string_actual, self.duracion_segundos, self.url_limpia, capitulos, desc, transcripcion)
+        if self.generar_markdown_var.get():
+            self.corregir_a_markdown(ruta, self.titulo_video_actual, self.id_video_actual, self.canal_video_actual, self.fecha_video_actual, self.duracion_string_actual, self.duracion_segundos, self.url_limpia, capitulos, desc, transcripcion)
         self.ultima_ruta_descarga = ruta
         self.agregar_al_historial(self.titulo_video_actual, ruta, tipo="video")
         if integridad_ok:
@@ -1331,7 +1337,8 @@ tags: [recurso/playlist, moc]
                     transcripcion_v = self.procesar_transcripcion_y_limpieza(carpeta_pl, v_info)
 
                     file_saneado = self.saneamiento_titulo_archivo(v_tit)
-                    self.corregir_a_markdown(carpeta_pl, v_tit, v_id, v_can, v_fec, v_dur_str, v_dur_sec, f"https://www.youtube.com/watch?v={v_id}", v_caps, v_desc, transcripcion_v)
+                    if self.generar_markdown_var.get():
+                        self.corregir_a_markdown(carpeta_pl, v_tit, v_id, v_can, v_fec, v_dur_str, v_dur_sec, f"https://www.youtube.com/watch?v={v_id}", v_caps, v_desc, transcripcion_v)
 
                     if omitir_duplicados and v_id:
                         registro = self.cargar_registro(carpeta_pl)
@@ -1530,7 +1537,8 @@ tags: [recurso/playlist, moc]
         integridad_ok = self.verificar_integridad_archivo(info)
         transcripcion = self.procesar_transcripcion_y_limpieza(ruta_base, info)
 
-        self.corregir_a_markdown(ruta_base, titulo, video_id, canal, fecha, dur_str, dur_sec, url_final, capitulos, desc, transcripcion)
+        if self.generar_markdown_var.get():
+            self.corregir_a_markdown(ruta_base, titulo, video_id, canal, fecha, dur_str, dur_sec, url_final, capitulos, desc, transcripcion)
         if not integridad_ok:
             self.after(0, lambda: self.imprimir_en_tabla(f"⚠️ Posible descarga incompleta: {titulo}\n", limpiar=False))
 
