@@ -1,4 +1,4 @@
-# 🎬 YTDownloader Kadir v8.1 — Definitive Edition
+# 🎬 YTDownloader Kadir — Definitive Edition
 
 Un potente gestor de descargas multimedia universal optimizado para la automatización de bases de conocimiento y entornos personales de Obsidian. Cuenta con un diseño premium Sci-Fi Cyberpunk/Dark basado en `customtkinter`, soporte multihilo distribuido y un motor híbrido inteligente que alterna entre análisis nativo por `yt-dlp` y bypass mediante la API de `Piped`.
 
